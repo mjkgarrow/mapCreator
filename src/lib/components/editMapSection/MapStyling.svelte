@@ -3,13 +3,14 @@
 
 	const mapState = getMapState();
 
-	let showLabels = $state(false);
 	let showDisputedBoundaries = $state(true);
-	let showAdmin2 = $state(true);
-	let showAdmin4 = $state(false);
-	let showAdmin6 = $state(false);
-	let showAdmin8 = $state(false);
-	// let showAdmin10 = $state(false);
+	let showCountryBoundary = $state(true);
+	let showStateBoundary = $state(false);
+	let showDistrictBoundaries = $state(false);
+	let showSuburbBoundaries = $state(false);
+	let showAllBoundaries = $state(false);
+
+	let showLabels = $state(false);
 	let showRoads = $state(false);
 	let showWater = $state(true);
 	let showBuildings = $state(false);
@@ -25,41 +26,41 @@
 	let pitch = $state(0);
 
 	const mapVariables = [
-		{ label: 'Labels (Text & Icons)', bind: () => showLabels, update: (v) => (showLabels = v) },
 		{
-			label: 'National boundaries',
-			bind: () => showAdmin2,
-			update: (v) => (showAdmin2 = v)
+			label: 'Country boundaries',
+			bind: () => showCountryBoundary,
+			update: (v) => (showCountryBoundary = v)
 		},
 		{
-			label: 'Sub-national boundaries',
-			bind: () => showAdmin4,
-			update: (v) => (showAdmin4 = v)
+			label: 'State boundaries',
+			bind: () => showStateBoundary,
+			update: (v) => (showStateBoundary = v)
 		},
 		{
-			label: 'Counties & districts',
-			bind: () => showAdmin6,
-			update: (v) => (showAdmin6 = v)
+			label: 'District boundaries',
+			bind: () => showDistrictBoundaries,
+			update: (v) => (showDistrictBoundaries = v)
 		},
 		{
 			label: 'Neighbourhoods & suburbs',
-			bind: () => showAdmin8,
-			update: (v) => (showAdmin8 = v)
+			bind: () => showSuburbBoundaries,
+			update: (v) => (showSuburbBoundaries = v)
 		},
-		// {
-		// 	label: 'Neighbourhoods/suburbs',
-		// 	bind: () => showAdmin10,
-		// 	update: (v) => (showAdmin10 = v)
-		// },
+		{
+			label: 'All boundaries',
+			bind: () => showAllBoundaries,
+			update: (v) => (showAllBoundaries = v)
+		},
 
 		{
 			label: 'Disputed Boundaries',
 			bind: () => showDisputedBoundaries,
 			update: (v) => (showDisputedBoundaries = v)
 		},
-		{ label: 'Roads & Transportation', bind: () => showRoads, update: (v) => (showRoads = v) },
-		{ label: 'Water Features', bind: () => showWater, update: (v) => (showWater = v) },
+		{ label: 'Labels (Text & Icons)', bind: () => showLabels, update: (v) => (showLabels = v) },
+		{ label: 'Rivers', bind: () => showWater, update: (v) => (showWater = v) },
 		{ label: 'Landcover & Parks', bind: () => showLandcover, update: (v) => (showLandcover = v) },
+		{ label: 'Roads & Transportation', bind: () => showRoads, update: (v) => (showRoads = v) },
 		{ label: 'Buildings', bind: () => showBuildings, update: (v) => (showBuildings = v) },
 		{ label: '3D Hillshade', bind: () => showHillshade, update: (v) => (showHillshade = v) }
 	];
@@ -186,10 +187,11 @@
 		const water = showWater;
 		const buildings = showBuildings;
 		const landcover = showLandcover;
-		const admin2 = showAdmin2;
-		const admin4 = showAdmin4;
-		const admin6 = showAdmin6;
-		const admin8 = showAdmin8;
+		const countryBoundary = showCountryBoundary;
+		const stateBoundary = showStateBoundary;
+		const districtBoundaries = showDistrictBoundaries;
+		const suburbBoundaries = showSuburbBoundaries;
+		const allBoundaries = showAllBoundaries;
 		// const admin10 = showAdmin10;
 
 		if (!map) return;
@@ -211,14 +213,16 @@
 
 					if (id.includes('disputed')) {
 						visibility = disputedBoundaries ? 'visible' : 'none';
-					} else if (id === 'boundary_2') {
-						visibility = admin2 ? 'visible' : 'none';
-					} else if (id === 'boundary_4') {
-						visibility = admin4 ? 'visible' : 'none';
-					} else if (id === 'boundary_6') {
-						visibility = admin6 ? 'visible' : 'none';
-					} else if (id === 'boundary_8') {
-						visibility = admin8 ? 'visible' : 'none';
+					} else if (id === 'country_boundary') {
+						visibility = countryBoundary ? 'visible' : 'none';
+					} else if (id === 'state_boundary') {
+						visibility = stateBoundary ? 'visible' : 'none';
+					} else if (id === 'district_boundaries') {
+						visibility = districtBoundaries ? 'visible' : 'none';
+					} else if (id === 'suburb_boundaries') {
+						visibility = suburbBoundaries ? 'visible' : 'none';
+					} else if (id === 'all_boundaries') {
+						visibility = allBoundaries ? 'visible' : 'none';
 					}
 				} else if (
 					layer['source-layer'] === 'transportation' ||
@@ -226,8 +230,8 @@
 				) {
 					visibility = roads ? 'visible' : 'none';
 				} else if (
-					layer['source-layer'] === 'water' ||
-					layer['source-layer'] === 'water_name' ||
+					// layer['source-layer'] === 'water' ||
+					// layer['source-layer'] === 'water_name' ||
 					layer['source-layer'] === 'waterway'
 				) {
 					visibility = water ? 'visible' : 'none';

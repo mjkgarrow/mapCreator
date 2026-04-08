@@ -609,14 +609,15 @@
 		},
 
 		{
-			"id": "boundary_2",
+			"id": "country_boundary",
 			"type": "line",
 			"source": "openmaptiles",
 			"source-layer": "boundary",
+			"minzoom": 0,
 			"filter": [
 				"all",
 				[">=", ["get", "admin_level"], 1],
-				["<=", ["get", "admin_level"], 2],
+				["<=", ["get", "admin_level"], 3],
 				["!=", ["get", "maritime"], 1],
 				["!=", ["get", "disputed"], 1],
 				["!", ["has", "claimed_by"]]
@@ -628,29 +629,36 @@
 		},
 
 		{
-			"id": "boundary_4",
+			"id": "state_boundary",
 			"type": "line",
 			"source": "openmaptiles",
 			"source-layer": "boundary",
+			"minzoom": 0,
 			"filter": [
 				"all",
-				[">=", ["get", "admin_level"], 2],
-				["<=", ["get", "admin_level"], 5],
+				[">=", ["get", "admin_level"], 4],
+				["<=", ["get", "admin_level"], 4],
 				["!=", ["get", "maritime"], 1],
 				["!=", ["get", "disputed"], 1],
 				["!", ["has", "claimed_by"]]
 			],
 			"paint": {
-				"line-color": "hsl(0,0%,75%)",
-				"line-width": ["interpolate", ["linear"], ["zoom"], 3, 1, 12, 3]
+				"line-color": "hsl(0,0%,80%)",
+				"line-width": {
+					"stops": [
+						[3, 0.5],
+						[10, 2]
+					]
+				}
 			}
 		},
 
 		{
-			"id": "boundary_6",
+			"id": "district_boundaries",
 			"type": "line",
 			"source": "openmaptiles",
 			"source-layer": "boundary",
+			"minzoom": 0,
 			"filter": [
 				"all",
 				[">=", ["get", "admin_level"], 5],
@@ -661,19 +669,25 @@
 			],
 			"paint": {
 				"line-color": "hsl(0,0%,80%)",
-				"line-width": ["interpolate", ["linear"], ["zoom"], 3, 1, 12, 3]
+				"line-width": {
+					"stops": [
+						[3, 0.5],
+						[10, 2]
+					]
+				}
 			}
 		},
 
 		{
-			"id": "boundary_8",
+			"id": "suburb_boundaries",
 			"type": "line",
 			"source": "openmaptiles",
 			"source-layer": "boundary",
+			"minzoom": 0,
 			"filter": [
 				"all",
 				[">=", ["get", "admin_level"], 6],
-				["<=", ["get", "admin_level"], 9],
+				["<=", ["get", "admin_level"], 10],
 				["!=", ["get", "maritime"], 1],
 				["!=", ["get", "disputed"], 1],
 				["!", ["has", "claimed_by"]]
@@ -682,6 +696,39 @@
 				"line-color": "hsl(0,0%,85%)",
 				"line-width": ["interpolate", ["linear"], ["zoom"], 3, 1, 12, 3]
 			}
+		},
+
+		{
+			"id": "all_boundaries",
+			"type": "line",
+			"source": "openmaptiles",
+			"source-layer": "boundary",
+			"minzoom": 0,
+			"filter": ["all", ["!=", ["get", "maritime"], 1]],
+			"paint": {
+				"line-color": "hsl(0,0%,80%)",
+				"line-width": {
+					"stops": [
+						[3, 0.5],
+						[10, 2]
+					]
+				}
+			}
+		},
+
+		{
+			"id": "boundary_disputed",
+			"type": "line",
+			"source": "openmaptiles",
+			"source-layer": "boundary",
+			"minzoom": 0,
+			"filter": ["all", ["!=", ["get", "maritime"], 1], ["==", ["get", "disputed"], 1]],
+			"paint": {
+				"line-color": "hsl(0,0%,70%)",
+				"line-dasharray": [1, 2],
+				"line-width": ["interpolate", ["linear"], ["zoom"], 3, 1, 12, 3]
+			},
+			"layout": { "visibility": "visible" }
 		},
 
 		{

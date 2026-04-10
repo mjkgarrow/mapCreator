@@ -2,6 +2,7 @@
 	import { getMapState } from '$lib/map.svelte';
 	import AddFile from '../AddFile.svelte';
 	import geoBoundsResponse from '../../assets/geoBoundsResponse.json';
+	import countries from '../../assets/countries.json';
 
 	const mapState = getMapState();
 
@@ -27,38 +28,11 @@
 		}
 	}
 	// New state for country selection
-	let countries = $state<
-		{ countryName: string; countryCode: string; topoUrl: string; geojsonUrl: string }[]
-	>([]);
-
-	let uniqueCountries = $state(
-		new Map<
-			string,
-			{ countryName: string; countryCode: string; topoUrl: string; geojsonUrl: string }
-		>()
-	);
 
 	let selectedCountryCode = $state('');
 	let isLoadingCountries = $state(false);
 	let isLoadingGeoJSON = $state(false);
 	let countryError = $state<string | null>(null);
-
-	// Fetch list of countries on component mount
-	$effect(() => {
-		geoBoundsResponse.forEach((country) => {
-			if (!uniqueCountries.has(country.boundaryISO)) {
-				uniqueCountries.set(country.boundaryISO, {
-					countryName: country.boundaryName,
-					countryCode: country.boundaryISO,
-					topoUrl: country.tjDownloadURL,
-					geojsonUrl: country.gjDownloadURL
-				});
-			}
-		});
-		countries = Array.from(uniqueCountries.values()).sort((a, b) =>
-			a.countryName.localeCompare(b.countryName)
-		);
-	});
 
 	// Fetch GeoJSON for selected country
 	$effect(() => {
@@ -72,8 +46,12 @@
 
 				// if (!topoJSONUrl) throw new Error('Invalid topoJSON URL');
 
+				// /ABW/ADM0/geoBoundaries-ABW-ADM0.topojson
+
+				let topoJSONUrl = `${selectedCountryCode}/ADM0/geoBoundaries-${selectedCountryCode}-ADM0.topojson`;
+
 				// const response = await fetch(topoJSONUrl);
-				const topoJSONUrl = uniqueCountries.get(selectedCountryCode)?.topoUrl.split('gbOpen/')[1];
+				// const topoJSONUrl = uniqueCountries.get(selectedCountryCode)?.topoUrl.split('gbOpen/')[1];
 
 				if (!topoJSONUrl) throw new Error('Invalid topoJSON URL');
 

@@ -1,3 +1,9 @@
 [build]
   command = "npm run build"
   publish = "build"
+
+[[redirects]]
+  from = "/api/geo/*"
+  to = "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/:splat"
+  status = 200
+  force = true 

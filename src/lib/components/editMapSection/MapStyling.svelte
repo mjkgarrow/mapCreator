@@ -2,23 +2,33 @@
 	import { getMapState } from '$lib/map.svelte';
 
 	const mapState = getMapState();
+	const hillshadeProviders = {
+		Stadia: 'https://tiles.stadiamaps.com/data/terrarium/{z}/{x}/{y}.png',
+		Amazon: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
+		OSM: 'https://klokantech.github.io/naturalearthtiles/tiles/natural_earth_2_shaded_relief.raster/{z}/{x}/{y}.png'
+	};
 
-	let showDisputedBoundaries = $state(true);
-	let showCountryBoundary = $state(true);
+	let showAllCountryBoundary = $state(true);
 	let showStateBoundary = $state(false);
 	let showDistrictBoundaries = $state(false);
 	let showSuburbBoundaries = $state(false);
 	let showAllBoundaries = $state(false);
+	let showCountryBoundary = $state(false);
+	let showDisputedBoundaries = $state(false);
 
-	let showLabels = $state(false);
+	let showCapitalCountryRank1 = $state(false);
+	let showCapitalCountryRank2 = $state(false);
+	let showCapitalCountryRank3 = $state(false);
+	let showCapitalCities = $state(false);
 	let showRoads = $state(false);
-	let showWater = $state(true);
+	let showRivers = $state(false);
+	let showLakes = $state(false);
 	let showBuildings = $state(false);
 	let showLandcover = $state(false);
 	let showHillshade = $state(false);
 	let hillshadeOpacity = $state(0.5);
 	let hillshadeExaggeration = $state(0.5);
-	let stadiaHillshade = $state(true);
+	let hillshadeProvider = $state('amazon');
 	let globe = $state(true);
 
 	let zoom = $state(2);
@@ -27,9 +37,9 @@
 
 	const mapVariables = [
 		{
-			label: 'Country boundaries',
-			bind: () => showCountryBoundary,
-			update: (v) => (showCountryBoundary = v)
+			label: 'Country boundaries (all)',
+			bind: () => showAllCountryBoundary,
+			update: (v) => (showAllCountryBoundary = v)
 		},
 		{
 			label: 'State boundaries',
@@ -51,14 +61,39 @@
 			bind: () => showAllBoundaries,
 			update: (v) => (showAllBoundaries = v)
 		},
-
+		{
+			label: 'Country boundaries (excl disputed)',
+			bind: () => showCountryBoundary,
+			update: (v) => (showCountryBoundary = v)
+		},
 		{
 			label: 'Disputed Boundaries',
 			bind: () => showDisputedBoundaries,
 			update: (v) => (showDisputedBoundaries = v)
 		},
-		{ label: 'Labels (Text & Icons)', bind: () => showLabels, update: (v) => (showLabels = v) },
-		{ label: 'Rivers', bind: () => showWater, update: (v) => (showWater = v) },
+		{
+			label: 'Country label rank 1',
+			bind: () => showCapitalCountryRank1,
+			update: (v) => (showCapitalCountryRank1 = v)
+		},
+		{
+			label: 'Country label rank 2',
+			bind: () => showCapitalCountryRank2,
+			update: (v) => (showCapitalCountryRank2 = v)
+		},
+		{
+			label: 'Country label rank 3',
+			bind: () => showCapitalCountryRank3,
+			update: (v) => (showCapitalCountryRank3 = v)
+		},
+		{
+			label: 'Capital cities',
+			bind: () => showCapitalCities,
+			update: (v) => (showCapitalCities = v)
+		},
+		// The new specific label toggles will be rendered as sub-options under 'Labels (Text & Icons)'
+		{ label: 'Rivers', bind: () => showRivers, update: (v) => (showRivers = v) },
+		{ label: 'Lakes', bind: () => showLakes, update: (v) => (showLakes = v) },
 		{ label: 'Landcover & Parks', bind: () => showLandcover, update: (v) => (showLandcover = v) },
 		{ label: 'Roads & Transportation', bind: () => showRoads, update: (v) => (showRoads = v) },
 		{ label: 'Buildings', bind: () => showBuildings, update: (v) => (showBuildings = v) },
@@ -110,7 +145,7 @@
 	$effect(() => {
 		const map = mapState.map;
 		const active = showHillshade;
-		const useStadia = stadiaHillshade;
+		const hillshadeProviderType = hillshadeProvider;
 
 		if (!map) return;
 
@@ -119,9 +154,7 @@
 
 			if (active) {
 				const existingSource = map.getSource('hillshade-source') as any;
-				const targetUrl = useStadia
-					? 'https://tiles.stadiamaps.com/data/terrarium/{z}/{x}/{y}.png'
-					: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png';
+				const targetUrl = hillshadeProviders[hillshadeProviderType];
 
 				if (existingSource && existingSource.tiles[0] !== targetUrl) {
 					if (map.getLayer('hillshade-layer')) map.removeLayer('hillshade-layer');
@@ -178,23 +211,41 @@
 	$effect(() => {
 		const map = mapState.map;
 
-		// Explicitly read state variables synchronously so Svelte tracks them as dependencies
-		const labels = showLabels;
-		// const boundaries = showBoundaries;
-		// const internalBoundaries = showInternalBoundaries;
+		const capitalCountryRank1 = showCapitalCountryRank1;
+		const capitalCountryRank2 = showCapitalCountryRank2;
+		const capitalCountryRank3 = showCapitalCountryRank3;
+		const capitalCities = showCapitalCities;
+
 		const disputedBoundaries = showDisputedBoundaries;
 		const roads = showRoads;
-		const water = showWater;
+		const rivers = showRivers;
+		const lakes = showLakes;
 		const buildings = showBuildings;
 		const landcover = showLandcover;
 		const countryBoundary = showCountryBoundary;
+		const allCountryBoundary = showAllCountryBoundary;
 		const stateBoundary = showStateBoundary;
 		const districtBoundaries = showDistrictBoundaries;
 		const suburbBoundaries = showSuburbBoundaries;
 		const allBoundaries = showAllBoundaries;
-		// const admin10 = showAdmin10;
 
 		if (!map) return;
+
+		const labelLayersControlledByShowLabels = [
+			'water_name_point_label',
+			'water_name_line_label',
+			'highway-name-path',
+			'highway-name-minor',
+			'highway-name-major',
+			'label_other',
+			'label_village',
+			'label_town',
+			'highway-name-path',
+			'highway-name-minor',
+			'highway-name-major',
+			'label_state',
+			'label_city'
+		];
 
 		const updateVisibility = () => {
 			const style = map.getStyle();
@@ -202,19 +253,33 @@
 
 			style.layers.forEach((layer: any) => {
 				// Skip custom GeoJSON layers added by the user
-				if (layer.source && map.getSource(layer.source)?.type === 'geojson') return;
+				if (layer.source && map.getSource(layer.source)?.type === 'geojson') {
+					return;
+				}
 
-				let visibility: 'visible' | 'none' | undefined = undefined;
+				let visibility: 'visible' | 'none' | undefined = undefined; // Default to undefined, meaning no change to visibility
+				const id = layer.id.toLowerCase();
 
-				if (layer.type === 'symbol') {
-					visibility = labels ? 'visible' : 'none';
+				if (labelLayersControlledByShowLabels.includes(id)) {
+					visibility = 'none';
+				}
+
+				// Handle specific label layers first, nested under the main 'showLabels' toggle
+				if (id === 'label_country_1') {
+					visibility = capitalCountryRank1 ? 'visible' : 'none';
+				} else if (id === 'label_country_2') {
+					visibility = capitalCountryRank2 ? 'visible' : 'none';
+				} else if (id === 'label_country_3') {
+					visibility = capitalCountryRank3 ? 'visible' : 'none';
+				} else if (id === 'label_city_capital' || id === 'label_city_capital_point') {
+					visibility = capitalCities ? 'visible' : 'none';
 				} else if (layer['source-layer'] === 'boundary' || layer['source-layer'] === 'admin') {
-					const id = layer.id.toLowerCase();
-
 					if (id.includes('disputed')) {
 						visibility = disputedBoundaries ? 'visible' : 'none';
 					} else if (id === 'country_boundary') {
 						visibility = countryBoundary ? 'visible' : 'none';
+					} else if (id === 'all_country_boundary') {
+						visibility = allCountryBoundary ? 'visible' : 'none';
 					} else if (id === 'state_boundary') {
 						visibility = stateBoundary ? 'visible' : 'none';
 					} else if (id === 'district_boundaries') {
@@ -224,17 +289,12 @@
 					} else if (id === 'all_boundaries') {
 						visibility = allBoundaries ? 'visible' : 'none';
 					}
-				} else if (
-					layer['source-layer'] === 'transportation' ||
-					layer['source-layer'] === 'transportation_name'
-				) {
+				} else if (layer['source-layer'] === 'transportation') {
 					visibility = roads ? 'visible' : 'none';
-				} else if (
-					// layer['source-layer'] === 'water' ||
-					// layer['source-layer'] === 'water_name' ||
-					layer['source-layer'] === 'waterway'
-				) {
-					visibility = water ? 'visible' : 'none';
+				} else if (layer['id'] === 'waterway') {
+					visibility = rivers ? 'visible' : 'none';
+				} else if (layer['id'] === 'lakes') {
+					visibility = lakes ? 'visible' : 'none';
 				} else if (layer['source-layer'] === 'building') {
 					visibility = buildings ? 'visible' : 'none';
 				} else if (
@@ -352,28 +412,19 @@
 				<div class="grid grid-cols-[11ch_1fr] items-center gap-3">
 					<span class="text-right font-mono text-xs text-neutral-500">Provider</span>
 					<div class="flex gap-4">
-						<label class="flex cursor-pointer items-center gap-2 text-xs text-neutral-700">
-							<input
-								type="radio"
-								name="hillshade-provider"
-								value={true}
-								bind:group={stadiaHillshade}
-								disabled={!showHillshade}
-								class="h-3 w-3 cursor-pointer border-neutral-300"
-							/>
-							Stadia
-						</label>
-						<label class="flex cursor-pointer items-center gap-2 text-xs text-neutral-700">
-							<input
-								type="radio"
-								name="hillshade-provider"
-								value={false}
-								bind:group={stadiaHillshade}
-								disabled={!showHillshade}
-								class="h-3 w-3 cursor-pointer border-neutral-300"
-							/>
-							Amazon
-						</label>
+						{#each Object.keys(hillshadeProviders) as provider}
+							<label class="flex cursor-pointer items-center gap-2 text-xs text-neutral-700">
+								<input
+									type="radio"
+									name="hillshade-provider"
+									value={provider}
+									bind:group={hillshadeProvider}
+									disabled={!showHillshade}
+									class="h-3 w-3 cursor-pointer border-neutral-300"
+								/>
+								{provider}
+							</label>
+						{/each}
 					</div>
 				</div>
 				<div class="grid grid-cols-[11ch_1fr_5ch] items-center gap-3">
